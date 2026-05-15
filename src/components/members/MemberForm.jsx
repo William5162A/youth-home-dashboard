@@ -111,7 +111,7 @@ export default function MemberForm({ onCancel, onSuccess, initialData = null }) 
             إلغاء
           </button>
           <button type="submit" disabled={loading} className="px-6 py-2 bg-brand-blue text-white font-semibold rounded-md hover:bg-brand-blue-dark hover:scale-105 active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:hover:scale-100">
-            {loading ? 'جاري الحفظ...' : (initialData ? 'تحديث البيانات' : 'حفظ العضو')}
+            {loading ? 'جاري الحفظ...' : (initialData ? 'حفظ' : 'حفظ العضو')}
           </button>
         </div>
       </form>

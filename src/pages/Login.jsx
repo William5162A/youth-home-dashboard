@@ -28,7 +28,7 @@ export default function Login() {
       <div className="w-full max-w-md rounded-xl bg-surface p-8 shadow-lg">
         <div className="mb-8 text-center">
           <h1 translate="no" className="text-3xl font-bold text-brand-blue">بيت الشباب</h1>
-          <p translate="no" className="mt-2 text-sm text-slate-500">لوحة تحكم الإدارة</p>
+          <p translate="no" className="mt-2 text-sm text-slate-500">لوحة التحكم الإدارية</p>
         </div>
 
         {error && (

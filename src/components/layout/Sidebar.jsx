@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 
 export default function Sidebar({ isOpen, setIsOpen }) {
   const navItems = [
-    { name: 'الرئيسية', path: '/' },
+    { name: 'لوحة التحكم', path: '/' },
     { name: 'الأعضاء', path: '/members' },
     { name: 'الاجتماعات', path: '/meetings' },
     { name: 'النشاطات', path: '/activities' },
@@ -28,6 +28,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         <div className="flex h-16 items-center justify-between px-6 border-b border-white/10">
           <span translate="no" className="text-xl font-bold text-brand-gold">بيت الشباب</span>
           <button 
+            aria-label="إغلاق القائمة"
             className="lg:hidden text-white hover:text-brand-gold transition-colors"
             onClick={() => setIsOpen(false)}
           >

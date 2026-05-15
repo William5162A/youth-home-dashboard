@@ -97,7 +97,7 @@ export default function Meetings() {
                       <td className="flex lg:table-cell justify-between items-center py-3 lg:px-6 lg:py-4 border-b border-slate-100 lg:border-none">
                         <span className="lg:hidden text-xs font-bold text-slate-400 uppercase">عدد الحضور</span>
                         <span className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-present-bg text-present-text font-bold lg:mx-auto">
-                          {getPresentCount(meeting.attendance)} عضو
+                          {getPresentCount(meeting.attendance)} عضواً
                         </span>
                       </td>
                       <td className="flex lg:table-cell justify-center items-center py-4 lg:px-6 lg:py-4">

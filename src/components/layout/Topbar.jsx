@@ -10,6 +10,7 @@ export default function Topbar({ toggleSidebar }) {
     <header className="flex h-16 items-center justify-between bg-surface px-4 shadow-sm lg:px-6">
       <button 
         onClick={toggleSidebar}
+        aria-label="فتح القائمة"
         className="p-2 text-slate-600 hover:bg-slate-100 rounded-md lg:hidden transition-colors"
       >
         ☰

@@ -69,11 +69,11 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-brand-blue mb-6">لوحة التحكم للإحصائيات</h1>
+      <h1 className="text-2xl font-bold text-brand-blue mb-6">لوحة التحكم</h1>
 
       {/* بطاقات الإحصائيات العلوية */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="الأعضاء النشطين" count={data.activeMembers.length} color="text-brand-blue" />
+        <StatCard title="الأعضاء النشطون" count={data.activeMembers.length} color="text-brand-blue" />
         <StatCard title="إجمالي الاجتماعات" count={data.meetings.length} color="text-brand-gold" />
         <StatCard title="إجمالي النشاطات" count={data.activities.length} color="text-slate-600" />
         <StatCard title="إجمالي المخيمات" count={data.camps.length} color="text-slate-600" />
@@ -148,7 +148,7 @@ function RecentList({ title, items, type }) {
                 <div className="flex items-center gap-3 text-xs text-slate-500 whitespace-nowrap">
                   <span dir="ltr">{item.date}</span>
                   {type === 'event' && (
-                    <span className="bg-slate-100 px-2 py-1 rounded font-medium">{item.participantsCount} مشارك</span>
+                    <span className="bg-slate-100 px-2 py-1 rounded font-medium">{item.participantsCount} مشاركاً</span>
                   )}
                 </div>
               </li>

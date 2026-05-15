@@ -80,7 +80,7 @@ export default function Members() {
   const activeMembers = members.filter(m => m.isActive);
   const formerMembers = members.filter(m => !m.isActive);
 
-  if (loading) return <div className="text-brand-blue font-bold">جاري تحميل السجلات...</div>;
+  if (loading) return <div className="text-brand-blue font-bold">جاري تحميل الأعضاء...</div>;
 
   return (
     <div className="space-y-6 relative">

@@ -44,7 +44,7 @@ export default function Activities() {
     }
   };
 
-  if (loading) return <div className="text-brand-blue font-bold">جاري تحميل السجلات...</div>;
+  if (loading) return <div className="text-brand-blue font-bold">جاري تحميل النشاطات...</div>;
 
   return (
     <div className="space-y-6 relative">
@@ -67,7 +67,7 @@ export default function Activities() {
                 <tr className="bg-slate-50 text-slate-500 uppercase border-b border-slate-100">
                   <th className="px-6 py-4">العنوان</th>
                   <th className="px-6 py-4">التاريخ</th>
-                  <th className="px-6 py-4 text-center">المشاركين</th>
+                  <th className="px-6 py-4 text-center">عدد المشاركين</th>
                   <th className="px-6 py-4 text-center">التقييم</th>
                   <th className="px-6 py-4 text-center">الإجراءات</th>
                 </tr>
@@ -89,7 +89,7 @@ export default function Activities() {
                         <span dir="ltr">{activity.date}</span>
                       </td>
                       <td className="flex lg:table-cell justify-between items-center py-3 lg:px-6 lg:py-4 border-b border-slate-100 lg:border-none font-bold text-slate-700">
-                        <span className="lg:hidden text-xs font-bold text-slate-400 uppercase">المشاركين</span>
+                        <span className="lg:hidden text-xs font-bold text-slate-400 uppercase">عدد المشاركين</span>
                         <span className="lg:mx-auto">{activity.participantsCount}</span>
                       </td>
                       <td className="flex lg:table-cell justify-between items-center py-3 lg:px-6 lg:py-4 border-b border-slate-100 lg:border-none text-brand-gold">
