@@ -147,11 +147,30 @@ export default function Members() {
           </td>
           
           {/* خلية الإجراءات */}
-          <td className="flex lg:table-cell justify-center items-center py-4 lg:px-6 lg:py-4 gap-4">
-             {/* أزرار الإجراءات تبقى كما هي */}
-             <button onClick={() => handleOpenEdit(member)} className="text-brand-blue font-medium hover:text-brand-blue-dark hover:scale-110 transition-transform cursor-pointer">تعديل</button>
-             <button onClick={() => handleToggleStatus(member.id, true)} className="text-slate-500 font-medium hover:text-brand-gold hover:scale-110 transition-transform cursor-pointer">انسحاب</button>
-             <button onClick={() => setMemberToDelete(member)} className="text-absent-text font-medium hover:text-red-800 hover:scale-110 transition-transform cursor-pointer">حذف</button>
+          <td className="flex lg:table-cell justify-center items-center py-4 lg:px-6 lg:py-4">
+            {/* حاوية مرنة للتحكم بالمسافات */}
+            <div className="flex items-center justify-center gap-4 lg:gap-6">
+              <button 
+                onClick={() => handleOpenEdit(member)} 
+                className="text-brand-blue font-medium hover:text-brand-blue-dark hover:scale-110 transition-transform cursor-pointer"
+              >
+                تعديل
+              </button>
+              
+              <button 
+                onClick={() => handleToggleStatus(member.id, true)} 
+                className="text-slate-500 font-medium hover:text-brand-gold hover:scale-110 transition-transform cursor-pointer"
+              >
+                انسحاب
+              </button>
+              
+              <button 
+                onClick={() => setMemberToDelete(member)} 
+                className="text-absent-text font-medium hover:text-red-800 hover:scale-110 transition-transform cursor-pointer"
+              >
+                حذف
+              </button>
+            </div>
           </td>
           
         </tr>
