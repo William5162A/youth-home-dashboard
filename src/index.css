@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  /* ألوان الهوية البصرية (اللوغو) */
+  --color-brand-blue: #2B5B7E;
+  --color-brand-blue-dark: #1E425E;
+  --color-brand-gold: #F2A03D;
+  --color-brand-gold-light: #F6BB6C;
+  
+  /* ألوان النظام الدلالية */
+  --color-present-bg: #dcfce7; /* خلفية خضراء خفيفة */
+  --color-present-text: #166534;
+  --color-absent-bg: #fee2e2; /* خلفية حمراء خفيفة */
+  --color-absent-text: #991b1b;
+  
+  /* ألوان الواجهة الأساسية */
+  --color-surface: #ffffff;
+  --color-background: #f8fafc;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-slate-800 font-sans antialiased;
+  }
+}
