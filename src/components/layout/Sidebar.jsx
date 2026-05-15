@@ -26,7 +26,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         }`}
       >
         <div className="flex h-16 items-center justify-between px-6 border-b border-white/10">
-          <span className="text-xl font-bold text-brand-gold">بيت الشباب</span>
+          <span translate="no" className="text-xl font-bold text-brand-gold">بيت الشباب</span>
           <button 
             className="lg:hidden text-white hover:text-brand-gold transition-colors"
             onClick={() => setIsOpen(false)}

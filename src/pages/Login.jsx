@@ -27,8 +27,8 @@ export default function Login() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md rounded-xl bg-surface p-8 shadow-lg">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-brand-blue">بيت الشباب</h1>
-          <p className="mt-2 text-sm text-slate-500">لوحة تحكم الإدارة</p>
+          <h1 translate="no" className="text-3xl font-bold text-brand-blue">بيت الشباب</h1>
+          <p translate="no" className="mt-2 text-sm text-slate-500">لوحة تحكم الإدارة</p>
         </div>
 
         {error && (
@@ -39,7 +39,7 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">البريد الإلكتروني</label>
+            <label translate="no" className="block text-sm font-medium text-slate-700 mb-1">البريد الإلكتروني</label>
             <input
               type="email"
               dir="ltr"
@@ -50,7 +50,7 @@ export default function Login() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">كلمة المرور</label>
+            <label translate="no" className="block text-sm font-medium text-slate-700 mb-1">كلمة المرور</label>
             <input
               type="password"
               dir="ltr"
