@@ -13,9 +13,15 @@ export default function Cafeteria() {
   // حالات الإدخال والتحكم بالنوافذ (Forms & Modals State)
   const [menuForm, setMenuForm] = useState({ name: '', price: '' });
   const [orderForm, setOrderForm] = useState({ itemId: '', qty: 1 });
+  
+  // نوافذ التحكم لقائمة الأصناف
   const [itemToDelete, setItemToDelete] = useState(null);
   const [editingMenuId, setEditingMenuId] = useState(null);
-  const [showCloseConfirm, setShowCloseConfirm] = useState(false); // حالة نافذة تأكيد إغلاق الفاتورة
+  
+  // نوافذ التحكم للفواتير
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+  const [invoiceToDelete, setInvoiceToDelete] = useState(null); // نافذة حذف الفاتورة المختارة
+  const [reopenError, setReopenError] = useState(false); // نافذة خطأ التضارب عند وجود فاتورة مفتوحة
 
   useEffect(() => {
     loadData();
@@ -86,7 +92,7 @@ export default function Cafeteria() {
   };
 
   // ==========================================
-  // منطق نقطة البيع (POS Logic)
+  // منطق نقطة البيع والفواتير (POS & Invoices Logic)
   // ==========================================
   const activeInvoice = invoices.find(inv => inv.status === 'open');
 
@@ -127,12 +133,6 @@ export default function Cafeteria() {
     }
   };
 
-  // فتح نافذة التأكيد بدلاً من window.confirm
-  const handleOpenCloseConfirm = () => {
-    setShowCloseConfirm(true);
-  };
-
-  // التنفيذ الفعلي للإغلاق
   const confirmCloseInvoice = async () => {
     if (!activeInvoice) return;
     try {
@@ -141,6 +141,33 @@ export default function Cafeteria() {
       loadData();
     } catch (error) {
       console.error("خطأ في إغلاق الفاتورة:", error);
+    }
+  };
+
+  // منطق التعديل للفواتير المغلقة (إعادة الفتح لمنع تضارب البيانات)
+  const handleReopenInvoice = async (invoiceId) => {
+    if (activeInvoice) {
+      setReopenError(true); // حظر الإجراء لوجود فاتورة نشطة بالفعل تمنع الدمج العشوائي
+      return;
+    }
+    try {
+      await cafeteriaService.reopenInvoice(invoiceId);
+      loadData();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      console.error("خطأ في إعادة فتح الفاتورة:", error);
+    }
+  };
+
+  // منطق الحذف النهائي للفاتورة التجريبية
+  const confirmDeleteInvoice = async () => {
+    if (!invoiceToDelete) return;
+    try {
+      await cafeteriaService.deleteInvoice(invoiceToDelete.id);
+      setInvoiceToDelete(null);
+      loadData();
+    } catch (error) {
+      console.error("خطأ في حذف الفاتورة:", error);
     }
   };
 
@@ -169,10 +196,11 @@ export default function Cafeteria() {
 
       {activeTab === 'pos' && (
         <div className="space-y-6">
+          {/* الفاتورة النشطة الحالية */}
           <div className="bg-surface p-6 rounded-xl shadow-sm border border-slate-100">
             {!activeInvoice ? (
               <div className="text-center py-8">
-                <p className="text-slate-500 mb-4">لا توجد فاتورة مفتوحة لهذا اليوم.</p>
+                <p className="text-slate-500 mb-4">لا توجد فاتورة مفتوحة لهذا اليوم أو قيد التعديل.</p>
                 <button onClick={handleCreateInvoice} className="bg-brand-blue text-white px-6 py-3 rounded-lg font-bold hover:bg-brand-blue-dark hover:scale-105 transition-all cursor-pointer">
                   + فتح فاتورة يومية جديدة
                 </button>
@@ -229,7 +257,7 @@ export default function Cafeteria() {
                       ))}
                     </ul>
                     <div className="mt-6 text-left">
-                      <button onClick={handleOpenCloseConfirm} className="bg-absent-text text-white px-6 py-2 rounded-lg font-bold hover:bg-red-800 transition-colors cursor-pointer">
+                      <button onClick={() => setShowCloseConfirm(true)} className="bg-absent-text text-white px-6 py-2 rounded-lg font-bold hover:bg-red-800 transition-colors cursor-pointer">
                         إنهاء فاتورة اليوم
                       </button>
                     </div>
@@ -239,6 +267,7 @@ export default function Cafeteria() {
             )}
           </div>
 
+          {/* أرشيف الفواتير مع أزرار الإجراءات الجديدة المصممة للتجاوب الشامل */}
           <h3 className="font-bold text-xl text-brand-blue mt-8 mb-4">أرشيف الفواتير المغلقة</h3>
           <div className="overflow-x-auto bg-surface rounded-xl shadow-sm border border-slate-100">
             <table className="w-full block lg:table text-right text-sm">
@@ -246,17 +275,18 @@ export default function Cafeteria() {
                 <tr className="bg-slate-50 text-slate-500 uppercase border-b border-slate-100">
                   <th className="px-6 py-4">التاريخ</th>
                   <th className="px-6 py-4">الحالة</th>
-                  <th className="px-6 py-4 text-left">إجمالي الإيرادات</th>
+                  <th className="px-6 py-4">إجمالي الإيرادات</th>
+                  <th className="px-6 py-4 text-center">الإجراءات</th>
                 </tr>
               </thead>
               <tbody className="block lg:table-row-group">
                 {invoices.filter(inv => inv.status === 'closed').length === 0 ? (
                    <tr className="block lg:table-row">
-                     <td colSpan="3" className="px-6 py-8 text-center text-slate-400 block lg:table-cell">لا توجد فواتير سابقة.</td>
+                     <td colSpan="4" className="px-6 py-8 text-center text-slate-400 block lg:table-cell">لا توجد فواتير سابقة.</td>
                    </tr>
                 ) : (
                   invoices.filter(inv => inv.status === 'closed').map(invoice => (
-                    <tr key={invoice.id} className="block lg:table-row border-b border-slate-100 hover:bg-slate-50">
+                    <tr key={invoice.id} className="block lg:table-row bg-surface border border-slate-200 lg:border-none rounded-xl lg:rounded-none mb-4 lg:mb-0 p-4 lg:p-0 shadow-sm lg:shadow-none hover:bg-slate-50 transition-colors">
                       <td className="flex lg:table-cell justify-between items-center py-3 px-4 lg:py-4 border-b border-slate-100 lg:border-none">
                         <span className="lg:hidden font-bold text-slate-400">التاريخ</span>
                         <span dir="ltr" className="font-medium text-slate-700">{invoice.date}</span>
@@ -265,9 +295,20 @@ export default function Cafeteria() {
                         <span className="lg:hidden font-bold text-slate-400">الحالة</span>
                         <span className="text-xs font-bold px-2 py-1 bg-slate-200 text-slate-600 rounded">مغلقة</span>
                       </td>
-                      <td className="flex lg:table-cell justify-between items-center py-3 px-4 lg:py-4 text-left">
+                      <td className="flex lg:table-cell justify-between items-center py-3 px-4 lg:py-4 border-b border-slate-100 lg:border-none">
                         <span className="lg:hidden font-bold text-slate-400">الإجمالي</span>
                         <span className="font-bold text-green-600">{invoice.totalSales.toLocaleString()} ل.س</span>
+                      </td>
+                      {/* تباعد مرن ومتناسق مدعوم بـ Wrapper Div */}
+                      <td className="flex lg:table-cell justify-center items-center py-4 lg:py-4">
+                        <div className="flex items-center justify-center gap-4 lg:gap-6">
+                          <button onClick={() => handleReopenInvoice(invoice.id)} className="text-brand-blue font-medium hover:text-brand-blue-dark hover:scale-110 transition-transform cursor-pointer">
+                            تعديل
+                          </button>
+                          <button onClick={() => setInvoiceToDelete(invoice)} className="text-absent-text font-medium hover:text-red-800 hover:scale-110 transition-transform cursor-pointer">
+                            حذف
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -361,13 +402,17 @@ export default function Cafeteria() {
         </div>
       )}
 
-      {/* نافذة تأكيد حذف الصنف */}
+      {/* ========================================== */}
+      {/* طبقة النوافذ المنبثقة (Modals Layer) */}
+      {/* ========================================== */}
+
+      {/* 1. نافذة حذف الصنف من القائمة */}
       {itemToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
           <div className="bg-surface rounded-xl shadow-lg p-6 max-w-sm w-full">
             <h3 className="text-lg font-bold text-slate-800 mb-2">تأكيد الحذف</h3>
             <p className="text-sm text-slate-600 mb-6">
-              هل أنت متأكد من حذف الصنف <span className="font-bold text-absent-text">{itemToDelete.name}</span>؟ لن يظهر هذا الصنف في فواتير اليوم الجديدة، لكنه سيبقى محفوظاً في أرشيف الفواتير السابقة.
+              هل أنت متأكد من حذف الصنف <span className="font-bold text-absent-text">{itemToDelete.name}</span>؟ لن يظهر في القوائم الجديدة.
             </p>
             <div className="flex justify-end gap-3">
               <button onClick={() => setItemToDelete(null)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-md cursor-pointer">إلغاء</button>
@@ -377,17 +422,50 @@ export default function Cafeteria() {
         </div>
       )}
 
-      {/* نافذة تأكيد إغلاق الفاتورة (الجديدة) */}
+      {/* 2. نافذة إنهاء وإغلاق فاتورة اليوم */}
       {showCloseConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
           <div className="bg-surface rounded-xl shadow-lg p-6 max-w-sm w-full">
             <h3 className="text-lg font-bold text-slate-800 mb-2">تأكيد إنهاء الفاتورة</h3>
             <p className="text-sm text-slate-600 mb-6">
-              هل أنت متأكد من إنهاء فاتورة اليوم؟ <span className="block mt-2 font-bold text-absent-text">تحذير: لن تتمكن من إضافة أي طلبات جديدة لهذه الفاتورة بعد الإغلاق.</span>
+              هل أنت متأكد من إنهاء فاتورة اليوم؟ لن تتمكن من إضافة أي طلبات جديدة لها بعد الإغلاق إلا بإعادة فتحها يدوياً.
             </p>
             <div className="flex justify-end gap-3">
               <button onClick={() => setShowCloseConfirm(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-md cursor-pointer">تراجع</button>
               <button onClick={confirmCloseInvoice} className="px-4 py-2 bg-absent-text text-white font-semibold rounded-md hover:bg-red-800 cursor-pointer">نعم، أنهِ الفاتورة</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. نافذة حذف الفاتورة التجريبية (جديد) */}
+      {invoiceToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="bg-surface rounded-xl shadow-lg p-6 max-w-sm w-full animate-in zoom-in-95 duration-150">
+            <h3 className="text-lg font-bold text-slate-800 mb-2">حذف سجل الفاتورة</h3>
+            <p className="text-sm text-slate-600 mb-6">
+              هل أنت متأكد من حذف فاتورة تاريخ <span className="font-bold text-absent-text">{invoiceToDelete.date}</span> نهائياً؟ هذا الإجراء مخصص لتنظيف البيانات التجريبية وسيمسح السجل من قاعدة البيانات فوراً.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setInvoiceToDelete(null)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-md cursor-pointer">إلغاء</button>
+              <button onClick={confirmDeleteInvoice} className="px-4 py-2 bg-absent-text text-white font-semibold rounded-md hover:bg-red-800 cursor-pointer">حذف نهائي</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 4. نافذة منع تضارب الحالات عند التعديل (جديد) */}
+      {reopenError && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="bg-surface rounded-xl shadow-lg p-6 max-w-sm w-full animate-in zoom-in-95 duration-150">
+            <h3 className="text-lg font-bold text-red-600 mb-2">عائق منطقي في البيانات</h3>
+            <p className="text-sm text-slate-600 mb-6">
+              لا يمكن تعديل أو إعادة فتح هذه الفاتورة حالياً، نظراً لوجود فاتورة أخرى <span className="font-bold text-brand-blue">مفتوحة</span> في قسم المبيعات اليومية. يرجى إنهاء الفاتورة المفتوحة أولاً لتتمكن من تعديل السجلات المؤرشفة بشكل معزول.
+            </p>
+            <div className="flex justify-end">
+              <button onClick={() => setReopenError(false)} className="px-5 py-2 bg-slate-800 text-white font-semibold rounded-md hover:bg-slate-700 cursor-pointer">
+                فهمت ذلك
+              </button>
             </div>
           </div>
         </div>
