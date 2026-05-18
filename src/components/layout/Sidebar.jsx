@@ -1,13 +1,21 @@
 import { NavLink } from 'react-router-dom';
 
 export default function Sidebar({ isOpen, setIsOpen }) {
-  // كلاسات مشتركة للروابط لتقليل التكرار (DRY Principle)
+  // كلاسات مشتركة للروابط
   const navLinkClass = ({ isActive }) => 
     `flex items-center px-3 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
       isActive 
         ? 'bg-brand-gold text-brand-blue-dark shadow-sm' 
         : 'text-white/70 hover:bg-white/10 hover:text-white hover:translate-x-1'
     }`;
+
+  // دالة موحدة للتعامل مع النقر وإغلاق القائمة في الشاشات الصغيرة
+  const handleLinkClick = () => {
+    // إغلاق القائمة يتم فقط إذا كانت مفتوحة (شاشات أقل من 1024px)
+    if (isOpen) {
+      setIsOpen(false);
+    }
+  };
 
   return (
     <>
@@ -19,7 +27,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         />
       )}
 
-      {/* القائمة الجانبية (نمط داكن) */}
+      {/* القائمة الجانبية */}
       <aside 
         className={`fixed inset-y-0 right-0 z-50 w-64 transform bg-brand-blue text-white shadow-2xl lg:shadow-none transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
@@ -37,14 +45,14 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             <p className="px-3 mb-4 text-xs font-bold text-white/50 uppercase tracking-wider">
               فرقة العاملين
             </p>
-            <NavLink to="/dashboard" className={navLinkClass}>اللوحة العامة</NavLink>
-            <NavLink to="/members" className={navLinkClass}>إدارة الأعضاء</NavLink>
-            <NavLink to="/meetings" className={navLinkClass}>الاجتماعات</NavLink>
-            <NavLink to="/activities" className={navLinkClass}>النشاطات</NavLink>
-            <NavLink to="/camps" className={navLinkClass}>المخيمات</NavLink>
+            <NavLink to="/dashboard" className={navLinkClass} onClick={handleLinkClick}>اللوحة العامة</NavLink>
+            <NavLink to="/members" className={navLinkClass} onClick={handleLinkClick}>إدارة الأعضاء</NavLink>
+            <NavLink to="/meetings" className={navLinkClass} onClick={handleLinkClick}>الاجتماعات</NavLink>
+            <NavLink to="/activities" className={navLinkClass} onClick={handleLinkClick}>النشاطات</NavLink>
+            <NavLink to="/camps" className={navLinkClass} onClick={handleLinkClick}>المخيمات</NavLink>
           </div>
 
-          {/* خط فاصل أنيق بين المجموعتين */}
+          {/* خط فاصل */}
           <div className="border-t border-white/10 mx-3 my-4"></div>
 
           {/* المجموعة الثانية: إدارة بيت الشباب */}
@@ -52,10 +60,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             <p className="px-3 mb-4 text-xs font-bold text-white/50 uppercase tracking-wider">
               إدارة بيت الشباب
             </p>
-            <NavLink to="/youth-home/dashboard" className={navLinkClass}>اللوحة المالية والإحصائيات</NavLink>
-            <NavLink to="/youth-home/cafeteria" className={navLinkClass}>مبيعات الكافيتيريا اليومية</NavLink>
-            <NavLink to="/youth-home/expenses" className={navLinkClass}>المصاريف والتشغيل العام</NavLink>
-            <NavLink to="/youth-home/activities" className={navLinkClass}>نشاطات بيت الشباب</NavLink>
+            <NavLink to="/youth-home/dashboard" className={navLinkClass} onClick={handleLinkClick}>اللوحة المالية والإحصائيات</NavLink>
+            <NavLink to="/youth-home/cafeteria" className={navLinkClass} onClick={handleLinkClick}>مبيعات الكافيتيريا اليومية</NavLink>
+            <NavLink to="/youth-home/expenses" className={navLinkClass} onClick={handleLinkClick}>المصاريف والتشغيل العام</NavLink>
+            <NavLink to="/youth-home/activities" className={navLinkClass} onClick={handleLinkClick}>نشاطات بيت الشباب</NavLink>
           </div>
 
         </nav>

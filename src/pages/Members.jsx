@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { memberService } from '../services/memberService';
 import { meetingService } from '../services/meetingService';
 import MemberForm from '../components/members/MemberForm';
+import { getDaysUntilBirthday, formatBirthdayCard } from '../utils/dateHelpers';
 
 export default function Members() {
   const [members, setMembers] = useState([]);
@@ -77,7 +78,16 @@ export default function Members() {
     return { attended, total, percentage };
   };
 
-  const activeMembers = members.filter(m => m.isActive);
+  // استخراج الأعضاء النشطين وفرزهم حسب أقرب عيد ميلاد باستخدام useMemo
+  const sortedActiveMembers = useMemo(() => {
+    const active = members.filter(m => m.isActive);
+    return active.sort((a, b) => {
+      const daysA = getDaysUntilBirthday(a.birthDate);
+      const daysB = getDaysUntilBirthday(b.birthDate);
+      return daysA - daysB; // ترتيب تصاعدي (الأقرب أولاً)
+    });
+  }, [members]);
+
   const formerMembers = members.filter(m => !m.isActive);
 
   if (loading) return <div className="text-brand-blue font-bold">جاري تحميل الأعضاء...</div>;
@@ -98,90 +108,93 @@ export default function Members() {
       ) : (
         <>
           <section className="rounded-xl bg-surface shadow-sm overflow-hidden border border-slate-100">
-            <div className="bg-brand-blue/5 px-6 py-4 border-b border-slate-100">
-              <h2 className="font-semibold text-brand-blue">الأعضاء الحاليين ({activeMembers.length})</h2>
+            <div className="bg-brand-blue/5 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+              <h2 className="font-semibold text-brand-blue">الأعضاء الحاليين ({sortedActiveMembers.length})</h2>
+              <span className="text-xs text-slate-500 font-medium">مرتبون حسب أقرب عيد ميلاد</span>
             </div>
             <div className="overflow-x-auto">
             <table className="w-full block lg:table text-right text-sm">
-  <thead className="hidden lg:table-header-group">
-    <tr className="bg-slate-50 text-slate-500 uppercase">
-      <th className="px-6 py-4">الاسم</th>
-      <th className="px-6 py-4">الرقم الوطني</th>
-      <th className="px-6 py-4">نسبة الحضور</th>
-      <th className="px-6 py-4 text-center">الإجراءات</th>
-    </tr>
-  </thead>
-  <tbody className="block lg:table-row-group">
-    {activeMembers.map(member => {
-      const stats = calculateAttendance(member.id);
-      return (
-        <tr key={member.id} className="block lg:table-row bg-surface border border-slate-200 lg:border-none rounded-xl lg:rounded-none mb-4 lg:mb-0 p-4 lg:p-0 shadow-sm lg:shadow-none hover:bg-slate-50 transition-colors">
-          
-          {/* خلية الاسم */}
-          <td className="flex lg:table-cell justify-between items-center py-3 lg:px-6 lg:py-4 border-b border-slate-100 lg:border-none">
-            <span className="lg:hidden text-xs font-bold text-slate-400 uppercase">الاسم</span>
-            <span className="font-medium">{member.name}</span>
-          </td>
-          
-          {/* خلية الرقم الوطني */}
-          <td className="flex lg:table-cell justify-between items-center py-3 lg:px-6 lg:py-4 border-b border-slate-100 lg:border-none text-slate-500">
-            <span className="lg:hidden text-xs font-bold text-slate-400 uppercase">الرقم الوطني</span>
-            <span>{member.nationalId}</span>
-          </td>
-          
-          {/* خلية نسبة الحضور */}
-          <td className="flex lg:table-cell justify-between items-center py-3 lg:px-6 lg:py-4 border-b border-slate-100 lg:border-none">
-            <span className="lg:hidden text-xs font-bold text-slate-400 uppercase">نسبة الحضور</span>
-            <div className="flex items-center gap-3">
-              <div className="font-bold text-lg" dir="ltr">
-                <span className="text-present-text">{stats.attended}</span>
-                <span className="text-slate-300 mx-1">/</span>
-                <span className="text-slate-400">{stats.total}</span>
-              </div>
-              <div className="relative flex items-center justify-center w-10 h-10 rounded-full" style={{ background: `conic-gradient(var(--color-present-text) ${stats.percentage}%, #f1f5f9 0)` }}>
-                <div className="absolute inset-1 bg-surface rounded-full flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-slate-700">{stats.percentage}%</span>
-                </div>
-              </div>
-            </div>
-          </td>
-          
-          {/* خلية الإجراءات */}
-          <td className="flex lg:table-cell justify-center items-center py-4 lg:px-6 lg:py-4">
-            {/* حاوية مرنة للتحكم بالمسافات */}
-            <div className="flex items-center justify-center gap-4 lg:gap-6">
-              <button 
-                onClick={() => handleOpenEdit(member)} 
-                className="text-brand-blue font-medium hover:text-brand-blue-dark hover:scale-110 transition-transform cursor-pointer"
-              >
-                تعديل
-              </button>
-              
-              <button 
-                onClick={() => handleToggleStatus(member.id, true)} 
-                className="text-slate-500 font-medium hover:text-brand-gold hover:scale-110 transition-transform cursor-pointer"
-              >
-                انسحاب
-              </button>
-              
-              <button 
-                onClick={() => setMemberToDelete(member)} 
-                className="text-absent-text font-medium hover:text-red-800 hover:scale-110 transition-transform cursor-pointer"
-              >
-                حذف
-              </button>
-            </div>
-          </td>
-          
-        </tr>
-      );
-    })}
-  </tbody>
-</table>
+              <thead className="hidden lg:table-header-group">
+                <tr className="bg-slate-50 text-slate-500 uppercase">
+                  <th className="px-6 py-4">الاسم</th>
+                  <th className="px-6 py-4">عيد الميلاد</th>
+                  <th className="px-6 py-4">الرقم الوطني</th>
+                  <th className="px-6 py-4">نسبة الحضور</th>
+                  <th className="px-6 py-4 text-center">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody className="block lg:table-row-group">
+                {sortedActiveMembers.map(member => {
+                  const stats = calculateAttendance(member.id);
+                  const daysLeft = getDaysUntilBirthday(member.birthDate);
+                  
+                  return (
+                    <tr key={member.id} className="block lg:table-row bg-surface border border-slate-200 lg:border-none rounded-xl lg:rounded-none mb-4 lg:mb-0 p-4 lg:p-0 shadow-sm lg:shadow-none hover:bg-slate-50 transition-colors">
+                      
+                      {/* خلية الاسم */}
+                      <td className="flex lg:table-cell justify-between items-center py-3 lg:px-6 lg:py-4 border-b border-slate-100 lg:border-none">
+                        <span className="lg:hidden text-xs font-bold text-slate-400 uppercase">الاسم</span>
+                        <span className="font-medium">{member.name}</span>
+                      </td>
+
+                      {/* خلية عيد الميلاد (إضافة جديدة) */}
+                      <td className="flex lg:table-cell justify-between items-center py-3 lg:px-6 lg:py-4 border-b border-slate-100 lg:border-none">
+                        <span className="lg:hidden text-xs font-bold text-slate-400 uppercase">عيد الميلاد</span>
+                        <div className="flex flex-col lg:items-start text-left lg:text-right">
+                          <span className="font-medium text-slate-700" dir="ltr">{formatBirthdayCard(member.birthDate)}</span>
+                          <span className={`text-[10px] font-bold ${daysLeft <= 7 ? 'text-absent-text animate-pulse' : 'text-slate-400'}`}>
+                            {daysLeft === 0 ? 'اليوم 🎉' : daysLeft === Infinity ? 'غير محدد' : `بعد ${daysLeft} يوم`}
+                          </span>
+                        </div>
+                      </td>
+                      
+                      {/* خلية الرقم الوطني */}
+                      <td className="flex lg:table-cell justify-between items-center py-3 lg:px-6 lg:py-4 border-b border-slate-100 lg:border-none text-slate-500">
+                        <span className="lg:hidden text-xs font-bold text-slate-400 uppercase">الرقم الوطني</span>
+                        <span>{member.nationalId}</span>
+                      </td>
+                      
+                      {/* خلية نسبة الحضور */}
+                      <td className="flex lg:table-cell justify-between items-center py-3 lg:px-6 lg:py-4 border-b border-slate-100 lg:border-none">
+                        <span className="lg:hidden text-xs font-bold text-slate-400 uppercase">نسبة الحضور</span>
+                        <div className="flex items-center gap-3">
+                          <div className="font-bold text-lg" dir="ltr">
+                            <span className="text-present-text">{stats.attended}</span>
+                            <span className="text-slate-300 mx-1">/</span>
+                            <span className="text-slate-400">{stats.total}</span>
+                          </div>
+                          <div className="relative flex items-center justify-center w-10 h-10 rounded-full" style={{ background: `conic-gradient(var(--color-present-text) ${stats.percentage}%, #f1f5f9 0)` }}>
+                            <div className="absolute inset-1 bg-surface rounded-full flex items-center justify-center">
+                              <span className="text-[10px] font-bold text-slate-700">{stats.percentage}%</span>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      
+                      {/* خلية الإجراءات */}
+                      <td className="flex lg:table-cell justify-center items-center py-4 lg:px-6 lg:py-4">
+                        <div className="flex items-center justify-center gap-4 lg:gap-6">
+                          <button onClick={() => handleOpenEdit(member)} className="text-brand-blue font-medium hover:text-brand-blue-dark hover:scale-110 transition-transform cursor-pointer">
+                            تعديل
+                          </button>
+                          <button onClick={() => handleToggleStatus(member.id, true)} className="text-slate-500 font-medium hover:text-brand-gold hover:scale-110 transition-transform cursor-pointer">
+                            انسحاب
+                          </button>
+                          <button onClick={() => setMemberToDelete(member)} className="text-absent-text font-medium hover:text-red-800 hover:scale-110 transition-transform cursor-pointer">
+                            حذف
+                          </button>
+                        </div>
+                      </td>
+                      
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
             </div>
           </section>
 
-          {/* قسم الأعضاء السابقين يبقى كما هو في الكود السابق */}
+          {/* قسم الأعضاء السابقين */}
           {formerMembers.length > 0 && (
             <section className="mt-8 rounded-xl bg-surface shadow-sm overflow-hidden border border-slate-100 opacity-75">
               <div className="bg-slate-100 px-6 py-4 border-b border-slate-200">
